@@ -1,6 +1,5 @@
 from __future__ import print_function
 from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
@@ -53,10 +52,9 @@ def h2oget_grid():
         air_grid.train(x=myX, y="IsDepDelayed", training_frame=air_hex, distribution="bernoulli")
 
         fetched_grid = h2o.get_grid(str(air_grid.grid_id))
-
+        pyunit_utils.verify_return_type('h2o.get_grid', 'H2OGridSearch', fetched_grid.__class__.__name__)
         assert(len(air_grid.get_grid())==5)
         assert (len(air_grid.get_grid())==len(fetched_grid.get_grid())), "h2o.get_grid() is command not working."
-
     except Exception as e:
         assert False, "h2o.get_grid() command is not working."
 

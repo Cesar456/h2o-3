@@ -1,12 +1,8 @@
 from __future__ import print_function
-from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
 import h2o
-import urllib.parse
-from h2o.estimators.glm import H2OGeneralizedLinearEstimator
 
 # DISCLAMINER
 #
@@ -36,7 +32,8 @@ def h2oassign():
         new_name = "newBenign.csv"
         training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"), destination_frame=old_name)
         assert training_data.frame_id==old_name, "h2o.import_file() is not working.  Wrong frame_id is assigned."
-        h2o.assign(training_data, new_name)
+        temp=h2o.assign(training_data, new_name)
+        pyunit_utils.verify_return_type("h2o.assign()","H2OFrame", temp.__class__.__name__)
         assert training_data.frame_id==new_name, "h2o.assign() is not working.  New frame_id is not assigned."
     except Exception as e:
         assert False, "h2o.assign() command is not working."

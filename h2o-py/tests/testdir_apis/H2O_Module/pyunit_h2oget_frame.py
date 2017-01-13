@@ -34,7 +34,7 @@ def h2oget_frame():
     try:
         frame1 = h2o.import_file(pyunit_utils.locate("smalldata/jira/hexdev_29.csv"))
         frame2 = h2o.get_frame(frame1.frame_id)
-        assert frame2.__class__.__name__ == "H2OFrame", "h2o.get_frame() command is not working."
+        pyunit_utils.verify_return_type("h2o.get_frame()", "H2OFrame", frame2.__class__.__name__)
     except Exception as e:
         assert False, "h2o.get_frame() command is not working."
 

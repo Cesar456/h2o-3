@@ -1,6 +1,4 @@
 from __future__ import print_function
-from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
@@ -21,25 +19,22 @@ import h2o
 # responses of the API commands are correct, or if in error, the correct error messages
 # are sent should be done elsewhere.
 
-def h2oframe():
+def h2ocluster_info():
     """
-    h2o.frame(frame_id)
+    h2o.cluster_info()
+    Deprecated, use h2o.cluster().show_status().
 
-    Testing the h2o.frame() command here.
+    Testing the h2o.cluster_info() command here.
 
     :return: none if test passes or error message otherwise
     """
     try:
-        training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"))
-        frame_summary = h2o.frame(training_data.frame_id)
-        pyunit_utils.verify_return_type("h2o.frame()", "H2OResponse", frame_summary.__class__.__name__)
-        assert frame_summary["frames"][0]['rows']==training_data.nrow, "h2o.frame() command is not working."
-        assert frame_summary["frames"][0]['column_count']==training_data.ncol, "h2o.frame() command is not working."
+        h2o.cluster_info()    # no return type
     except Exception as e:
-        assert False, "h2o.frame() command is not working."
+        assert False, "h2o.cluster_info() command is not working."
 
 
 if __name__ == "__main__":
-    pyunit_utils.standalone_test(h2oframe)
+    pyunit_utils.standalone_test(h2ocluster_info)
 else:
-    h2oframe()
+    h2ocluster_info()

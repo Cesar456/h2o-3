@@ -1,6 +1,4 @@
 from __future__ import print_function
-from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
@@ -35,14 +33,17 @@ def h2oconnect():
     ipA = "127.0.0.1"
     portN = "54321"
     urlS = "http://127.0.0.1:54321"
+    return_type = "H2OConnection"
 
     try:
-        h2o.connect(ip = ipA, port = portN, verbose = True)     # pass if no connection issue
+        connect_type=h2o.connect(ip = ipA, port = portN, verbose = True)
+        pyunit_utils.verify_return_type("h2o.connect()", return_type, connect_type.__class__.__name__)
     except Exception as e:  # port number may not match.  Make sure the right error message is returned
         assert "Could not establish link to H2O cloud" in e.args[0], "h2o.connect command is not working."
 
     try:
-        h2o.connect(url=urlS, https=True, verbose = True)     # pass if no connection issue
+        connect_type2 = h2o.connect(url=urlS, https=True, verbose = True)     # pass if no connection issue
+        pyunit_utils.verify_return_type("h2o.connect()", return_type, connect_type2.__class__.__name__)
     except Exception as e:  # port number may not match.  Make sure the right error message is returned
         assert "Could not establish link to H2O cloud" in e.args[0], "h2o.connect command is not working."
 

@@ -1,11 +1,10 @@
 from __future__ import print_function
 from builtins import str
 from builtins import range
-import sys
+import sys, os
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
 import h2o
-import urllib.parse
 from h2o.estimators.glm import H2OGeneralizedLinearEstimator
 
 # DISCLAMINER
@@ -27,25 +26,24 @@ def h2odownload_pojo():
     """
     h2o.download_pojo(model, path=u'', get_jar=True)
 
-    Testing the h2o.download_pojo() command here.
+    Testing the h2o.download_pojo() command here.  Copied from glm_download_pojo.py
 
     :return: none if test passes or error message otherwise
     """
     try:
-        training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"))
-        Y = 3
-        X = [0, 1, 2, 4, 5, 6, 7, 8, 9, 10]
-
-        model = H2OGeneralizedLinearEstimator(family="binomial", alpha=0, Lambda=1e-5)
-        model.train(x=X, y=Y, training_frame=training_data)
-        hf_col_summary = h2o.api("GET /3/Frames/%s/summary" % urllib.parse.quote(training_data.frame_id))["frames"][0]
-        assert hf_col_summary["row_count"]==100, "row count is incorrect.  Fix h2o.api()."
-        assert hf_col_summary["column_count"]==14, "column count is incorrect.  Fix h2o.api()."
-        model_coefficients = \
-            h2o.api("GET /3/GetGLMRegPath", data={"model": model._model_json["model_id"]["name"]})["coefficients"][0]
-        assert len(model_coefficients)==11, "Number of coefficients is wrong.  h2o.api() command not working"
+        h2o_df = h2o.import_file(pyunit_utils.locate("smalldata/prostate/prostate.csv"))
+        h2o_df['CAPSULE'] = h2o_df['CAPSULE'].asfactor()
+        binomial_fit = H2OGeneralizedLinearEstimator(family = "binomial")
+        binomial_fit.train(y = "CAPSULE", x = ["AGE", "RACE", "PSA", "GLEASON"], training_frame = h2o_df)
+        try:
+            results_dir = pyunit_utils.locate("results")    # find directory path to results folder
+            h2o.download_pojo(binomial_fit,path=results_dir)
+            assert os.path.isfile(os.path.join(results_dir, "h2o-genmodel.jar")), "h2o.download_pojo() " \
+                                                                                  "command is not working."
+        except:
+            h2o.download_pojo(binomial_fit)     # just print pojo to screen if directory does not exists
     except Exception as e:
-        assert False, "h2o.api() command not working"
+        assert False, "h2o.download_pojo() command is not working."
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ def h2oinit():
         h2o.init()
         print("h2o.init() command works!")
     except Exception as e:  # some errors are okay like version mismatch
-        assert "Version mismatch." in e.args[0], "Wrong exception messages found.  h2o.init() command is not working"
+        pyunit_utils.verify_return_type("h2o.init()", "H2OConnectionError", e.__class__.__name__)
 
     try:
         h2o.init(strict_version_check=False)

@@ -1,10 +1,9 @@
 from __future__ import print_function
-from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
 import h2o
+import random
 
 # DISCLAMINER
 #
@@ -13,7 +12,7 @@ import h2o
 # changes are necessary, we will have the chance to warn them about the changes.
 #
 # All API tests should be short and fast to run.  The main purposes of API tests are to
-# make sure that the command in its most popular forms run correctly when user types in
+# make sure that the command in its most popular forms, run correctly when user types in
 # correct input arguments.  Light weight checking will be provided on the command output
 # to make sure that we are getting the correct responses.
 #
@@ -21,25 +20,28 @@ import h2o
 # responses of the API commands are correct, or if in error, the correct error messages
 # are sent should be done elsewhere.
 
-def h2oframe():
+def h2oas_list():
     """
-    h2o.frame(frame_id)
+    h2o.as_list(data, use_pandas=True, header=True)
 
-    Testing the h2o.frame() command here.
+    Testing the h2o.as_list() command here.  Copied from pyunit_frame_as_list.py
 
     :return: none if test passes or error message otherwise
     """
-    try:
-        training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"))
-        frame_summary = h2o.frame(training_data.frame_id)
-        pyunit_utils.verify_return_type("h2o.frame()", "H2OResponse", frame_summary.__class__.__name__)
-        assert frame_summary["frames"][0]['rows']==training_data.nrow, "h2o.frame() command is not working."
-        assert frame_summary["frames"][0]['column_count']==training_data.ncol, "h2o.frame() command is not working."
-    except Exception as e:
-        assert False, "h2o.frame() command is not working."
 
+    try:
+        iris = h2o.import_file(path=pyunit_utils.locate("smalldata/iris/iris_wheader.csv"))
+
+        res1 = h2o.as_list(iris, use_pandas=False)
+        return_type = "list"
+        pyunit_utils.verify_return_type('h2o.as_list()', "list", res1.__class__.__name__)
+        res1 = list(zip(*res1))
+        assert abs(float(res1[0][9]) - 4.4) < 1e-10 and abs(float(res1[1][9]) - 2.9) < 1e-10 and \
+           abs(float(res1[2][9]) - 1.4) < 1e-10, "incorrect values"
+    except Exception as e:
+        assert False, "h2o.as_list() command not is working."
 
 if __name__ == "__main__":
-    pyunit_utils.standalone_test(h2oframe)
+    pyunit_utils.standalone_test(h2oas_list)
 else:
-    h2oframe()
+    h2oas_list()

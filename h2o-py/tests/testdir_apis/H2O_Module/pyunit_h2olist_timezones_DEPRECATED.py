@@ -1,10 +1,9 @@
 from __future__ import print_function
-from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
 import h2o
+import random
 
 # DISCLAMINER
 #
@@ -21,25 +20,25 @@ import h2o
 # responses of the API commands are correct, or if in error, the correct error messages
 # are sent should be done elsewhere.
 
-def h2oframe():
+def h2olist_timezones():
     """
-    h2o.frame(frame_id)
+    h2o.list_timezones()
+    Deprecated, use h2o.cluster().list_timezones().
 
-    Testing the h2o.frame() command here.
+    Testing the h2o.list_timezones() command here.
 
     :return: none if test passes or error message otherwise
     """
     try:
-        training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"))
-        frame_summary = h2o.frame(training_data.frame_id)
-        pyunit_utils.verify_return_type("h2o.frame()", "H2OResponse", frame_summary.__class__.__name__)
-        assert frame_summary["frames"][0]['rows']==training_data.nrow, "h2o.frame() command is not working."
-        assert frame_summary["frames"][0]['column_count']==training_data.ncol, "h2o.frame() command is not working."
+        timezones = h2o.list_timezones()
+        pyunit_utils.verify_return_type("h2o.list_timezones()", "H2OFrame", timezones.__class__.__name__)
+        assert timezones.nrow==460, "h2o.get_timezone() returns frame with wrong row number."
+        assert timezones.ncol==1, "h2o.get_timezone() returns frame with wrong column number."
     except Exception as e:
-        assert False, "h2o.frame() command is not working."
+        assert False, "h2o.list_timezones() command is not working."
 
 
 if __name__ == "__main__":
-    pyunit_utils.standalone_test(h2oframe)
+    pyunit_utils.standalone_test(h2olist_timezones)
 else:
-    h2oframe()
+    h2olist_timezones()

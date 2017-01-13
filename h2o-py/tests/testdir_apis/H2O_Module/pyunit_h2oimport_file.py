@@ -40,6 +40,7 @@ def h2oimport_file():
         training_data = h2o.import_file(pyunit_utils.locate("smalldata/prostate/prostate_cat.csv"),
                                         destination_frame=hex_key, header=1, sep = ',',
                                         col_names=col_headers, col_types=col_types, na_strings=["NA"])
+        pyunit_utils.verify_return_type("h2o.import_file()", "H2OFrame", training_data.__class__.__name__)
         assert training_data.frame_id == hex_key, "frame_id was not assigned correctly.  h2o.import_file() is not" \
                                                   " working."
         assert cmp(training_data.col_names, col_headers)==0, "column names are incorrect.  " \

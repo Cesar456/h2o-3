@@ -1,7 +1,7 @@
 from __future__ import print_function
 from builtins import str
 from builtins import range
-import sys
+import sys, os
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
 import h2o
@@ -33,19 +33,18 @@ def h2odownload_csv():
     """
     try:
         training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"))
-        Y = 3
-        X = [0, 1, 2, 4, 5, 6, 7, 8, 9, 10]
-
-        model = H2OGeneralizedLinearEstimator(family="binomial", alpha=0, Lambda=1e-5)
-        model.train(x=X, y=Y, training_frame=training_data)
-        hf_col_summary = h2o.api("GET /3/Frames/%s/summary" % urllib.parse.quote(training_data.frame_id))["frames"][0]
-        assert hf_col_summary["row_count"]==100, "row count is incorrect.  Fix h2o.api()."
-        assert hf_col_summary["column_count"]==14, "column count is incorrect.  Fix h2o.api()."
-        model_coefficients = \
-            h2o.api("GET /3/GetGLMRegPath", data={"model": model._model_json["model_id"]["name"]})["coefficients"][0]
-        assert len(model_coefficients)==11, "Number of coefficients is wrong.  h2o.api() command not working"
+        try:
+            results_dir = pyunit_utils.locate("results")    # find directory path to results folder
+            filename = os.path.join(results_dir, "benign.csv")
+            h2o.download_csv(training_data, filename)       # save csv
+            assert os.path.isfile(filename), "h2o.download_csv() command is not working."
+        except Exception as e:
+            if 'File not found' in e.args[0]:
+                print("Directory is not writable.  h2o.download_csv() command is not tested.")
+            else:
+                assert False, "h2o.download_csvresult() command is not working."
     except Exception as e:
-        assert False, "h2o.api() command not working"
+        assert False, "h2o.download_csv() command is not working."
 
 
 if __name__ == "__main__":

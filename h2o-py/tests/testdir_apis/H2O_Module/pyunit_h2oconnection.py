@@ -1,6 +1,4 @@
 from __future__ import print_function
-from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
@@ -32,7 +30,7 @@ def h2oconnection():
     # call with no arguments
     try:
         temp = h2o.connection()
-        assert temp.requests_count==7, "h2o.connection() command is not working."
+        pyunit_utils.verify_return_type("h2o.connection()", "H2OConnection", temp.__class__.__name__)
     except Exception as e:
         assert False, "h2o.connection() command is not working."
 

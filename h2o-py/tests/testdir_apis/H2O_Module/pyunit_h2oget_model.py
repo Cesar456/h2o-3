@@ -39,6 +39,7 @@ def h2oget_model():
         model = H2OGeneralizedLinearEstimator(family="binomial", alpha=0, Lambda=1e-5)
         model.train(x=X, y=Y, training_frame=training_data)
         model2 = h2o.get_model(model.model_id)
+        pyunit_utils.verify_return_type("h2o.get_model()",model.__class__.__name__, model2.__class__.__name__)
         assert (model._model_json['output']['model_category']==model2._model_json['output']['model_category']) and \
                (model2._model_json['output']['model_category']=='Binomial'), "h2o.get_model() command is not working"
 

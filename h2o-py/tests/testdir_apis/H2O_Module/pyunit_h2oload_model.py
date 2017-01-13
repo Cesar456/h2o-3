@@ -1,7 +1,7 @@
 from __future__ import print_function
 from builtins import str
 from builtins import range
-import sys
+import sys, os
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
 import h2o
@@ -25,9 +25,9 @@ from h2o.estimators.glm import H2OGeneralizedLinearEstimator
 
 def h2oapi():
     """
-    h2o.api(endpoint, data=None, json=None, filename=None, save_to=None)
+    h2o.load_model(path)
 
-    Testing the h2o.api() command here.
+    Testing the h2o.load_model() command here.
 
     :return: none if test passes or error message otherwise
     """
@@ -38,14 +38,22 @@ def h2oapi():
 
         model = H2OGeneralizedLinearEstimator(family="binomial", alpha=0, Lambda=1e-5)
         model.train(x=X, y=Y, training_frame=training_data)
-        hf_col_summary = h2o.api("GET /3/Frames/%s/summary" % urllib.parse.quote(training_data.frame_id))["frames"][0]
-        assert hf_col_summary["row_count"]==100, "row count is incorrect.  Fix h2o.api()."
-        assert hf_col_summary["column_count"]==14, "column count is incorrect.  Fix h2o.api()."
-        model_coefficients = \
-            h2o.api("GET /3/GetGLMRegPath", data={"model": model._model_json["model_id"]["name"]})["coefficients"][0]
-        assert len(model_coefficients)==11, "Number of coefficients is wrong.  h2o.api() is command not working."
+        try:
+            results_dir = pyunit_utils.locate("results")    # find directory path to results folder
+            h2o.save_model(model, path=results_dir, force=True)       # save model
+            full_path_filename = os.path.join(results_dir, model._id)
+            assert os.path.isfile(full_path_filename), "h2o.save_model() command is not working."
+            model_reloaded = h2o.load_model(full_path_filename)
+            pyunit_utils.verify_return_type("h2o.load_model()", model.__class__.__name__,
+                                            model_reloaded.__class__.__name__)
+
+        except Exception as e:
+            if 'File not found' in e.args[0]:
+                print("Directory is not writable.  h2o.load_model() command is not tested.")
+            else:
+                assert False, "h2o.load_model() command is not working."
     except Exception as e:
-        assert False, "h2o.api() command is not working"
+        assert False, "h2o.load_model() command is not working."
 
 
 if __name__ == "__main__":

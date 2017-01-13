@@ -27,25 +27,31 @@ def h2oframes():
     """
     h2o.frames()
 
-    Testing the h2o.api() command here.
+    Testing the h2o.frames() command here.
 
     :return: none if test passes or error message otherwise
     """
     try:
+        h2o.remove_all()    # remove all objects first
         training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"))
-        Y = 3
-        X = [0, 1, 2, 4, 5, 6, 7, 8, 9, 10]
-
-        model = H2OGeneralizedLinearEstimator(family="binomial", alpha=0, Lambda=1e-5)
-        model.train(x=X, y=Y, training_frame=training_data)
-        hf_col_summary = h2o.api("GET /3/Frames/%s/summary" % urllib.parse.quote(training_data.frame_id))["frames"][0]
-        assert hf_col_summary["row_count"]==100, "row count is incorrect.  Fix h2o.api()."
-        assert hf_col_summary["column_count"]==14, "column count is incorrect.  Fix h2o.api()."
-        model_coefficients = \
-            h2o.api("GET /3/GetGLMRegPath", data={"model": model._model_json["model_id"]["name"]})["coefficients"][0]
-        assert len(model_coefficients)==11, "Number of coefficients is wrong.  h2o.api() command not working"
+        arrestsH2O = h2o.upload_file(pyunit_utils.locate("smalldata/pca_test/USArrests.csv"))
+        prostate = h2o.upload_file(pyunit_utils.locate("smalldata/prostate/prostate_cat.csv"))
+        all_frames_summary = h2o.frames()
+        pyunit_utils.verify_return_type("h2o.frames()", "H2OResponse", all_frames_summary.__class__.__name__)
+        assert len(all_frames_summary['frames'])==3, "h2o.frames() command is not working.  It did not fetch all 3 " \
+                                                     "frame summaries."
+        total_columns = training_data.ncol+arrestsH2O.ncol+prostate.ncol
+        summary_total_columns = all_frames_summary['frames'][0]['columns']+all_frames_summary['frames'][1]['columns']\
+                                +all_frames_summary['frames'][2]['columns']
+        assert total_columns==summary_total_columns, "Wrong frame columns are returned in frame summary.  " \
+                                                     "h2o.frames() command is not working."
+        total_rows = training_data.nrow+arrestsH2O.nrow+prostate.nrow
+        summary_total_rows = all_frames_summary['frames'][0]['rows']+all_frames_summary['frames'][1]['rows'] \
+                                +all_frames_summary['frames'][2]['rows']
+        assert total_rows==summary_total_rows, "Wrong frame rows are returned in frame summary.  " \
+                                               "h2o.frames() command is not working."
     except Exception as e:
-        assert False, "h2o.api() command not working"
+        assert False, "h2o.frames() command is not working."
 
 
 if __name__ == "__main__":

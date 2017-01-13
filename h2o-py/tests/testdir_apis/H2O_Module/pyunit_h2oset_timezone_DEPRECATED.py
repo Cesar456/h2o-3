@@ -1,10 +1,9 @@
 from __future__ import print_function
-from builtins import str
-from builtins import range
 import sys
 sys.path.insert(1,"../../../")
 from tests import pyunit_utils
 import h2o
+import random
 
 # DISCLAMINER
 #
@@ -21,25 +20,36 @@ import h2o
 # responses of the API commands are correct, or if in error, the correct error messages
 # are sent should be done elsewhere.
 
-def h2oframe():
+def h2oset_timezone():
     """
-    h2o.frame(frame_id)
+    h2o.set_timezone(value)
+    Deprecated, set h2o.cluster().timezone instead.
 
-    Testing the h2o.frame() command here.
+    Testing the h2o.set_timezone() command here.  Copy from pyunit_get_set_list_timezones.py
 
     :return: none if test passes or error message otherwise
     """
     try:
-        training_data = h2o.import_file(pyunit_utils.locate("smalldata/logreg/benign.csv"))
-        frame_summary = h2o.frame(training_data.frame_id)
-        pyunit_utils.verify_return_type("h2o.frame()", "H2OResponse", frame_summary.__class__.__name__)
-        assert frame_summary["frames"][0]['rows']==training_data.nrow, "h2o.frame() command is not working."
-        assert frame_summary["frames"][0]['column_count']==training_data.ncol, "h2o.frame() command is not working."
+        origTZ = h2o.get_timezone()
+        print("Original timezone: {0}".format(origTZ))
+
+        timezones = h2o.list_timezones()
+        # don't use the first one..it's a header for the table
+        print("timezones[0]:", timezones[0])
+        zone = timezones[random.randint(1,timezones.nrow-1),0].split(" ")[1].split(",")[0]
+        print("Setting the timezone: {0}".format(zone))
+        h2o.set_timezone(zone)
+
+        newTZ = h2o.get_timezone()
+        assert newTZ == zone, "Expected new timezone to be {0}, but got {01}".format(zone, newTZ)
+
+        print("Setting the timezone back to original: {0}".format(origTZ))
+        h2o.set_timezone(origTZ)
     except Exception as e:
-        assert False, "h2o.frame() command is not working."
+        assert False, "h2o.set_timezone() command is not working."
 
 
 if __name__ == "__main__":
-    pyunit_utils.standalone_test(h2oframe)
+    pyunit_utils.standalone_test(h2oset_timezone)
 else:
-    h2oframe()
+    h2oset_timezone()

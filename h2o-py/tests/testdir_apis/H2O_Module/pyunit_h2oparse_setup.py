@@ -40,7 +40,7 @@ def h2oparse_setup():
         fraw = h2o.import_file(pyunit_utils.locate("smalldata/prostate/prostate_cat.csv"), parse=False)
         setup = h2o.parse_setup(fraw, destination_frame=hex_key, header=1, separator=',', column_names=col_headers,
                                 column_types=col_types, na_strings=["NA"])
-        assert setup.__class__.__name__ == "H2OResponse", "h2o.parse_setup() command is not working."
+        pyunit_utils.verify_return_type("h2o.parse_setup()", "H2OResponse", setup.__class__.__name__)
         assert setup["number_columns"]==len(col_headers), "h2o.parse_setup() command is not working."
     except Exception as e:
         assert False, "h2o.parse_setup() command is not working."
